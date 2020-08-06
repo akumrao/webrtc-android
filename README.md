@@ -17,7 +17,7 @@ Important: The IP address of the signaling server is hardcoded to `192.168.0.9` 
 ### Build Android App Client
 
 - "Open an existing Android Studio project"
-- Select the `Step-3` folder
+- Select the `P2PTest` folder
 - On "Unable to get Gradle wrapper properties from:" click "Ok" to recreate gradle files
 - Ignore/Cancel all git related questions
 - Agree to update Gradle
