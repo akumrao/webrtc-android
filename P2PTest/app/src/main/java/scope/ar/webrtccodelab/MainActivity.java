@@ -194,6 +194,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     private final MockLoggable mockLoggable = new MockLoggable();
 
+    private static final boolean ENABLE_H264_HIGH_PROFILE = false;
+
     public void start() {
         // keep screen on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -221,18 +223,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Create a new PeerConnectionFactory instance - using Hardware encoder and decoder.
         PeerConnectionFactory.Options options = new PeerConnectionFactory.Options();
 
-        DefaultVideoEncoderFactory ve = new DefaultVideoEncoderFactory(
-                rootEglBase.getEglBaseContext(),  /* enableIntelVp8Encoder */true,  /* enableH264HighProfile */true);
 
-        BuiltinAudioDecoderFactoryFactory  ve1= new BuiltinAudioDecoderFactoryFactory();
-        MultiplexVideoEncoderFactory defaultVideoEncoderFactory = new MultiplexVideoEncoderFactory();
-       // VideoCodecInfo[] ddd  = defaultVideoEncoderFactory.getSupportedCodecs();
-        MultiplexVideoDecoderFactory defaultVideoDecoderFactory = new MultiplexVideoDecoderFactory();
+        VideoEncoderFactory encoderFactory = new MultiplexVideoEncoderFactory(
+                rootEglBase.getEglBaseContext(), ENABLE_H264_HIGH_PROFILE);
+
+        VideoDecoderFactory decoderFactory = new MultiplexVideoDecoderFactory(rootEglBase.getEglBaseContext());
+
+
         peerConnectionFactory = PeerConnectionFactory.builder()
                 .setOptions(options)
-                .setVideoEncoderFactory1(defaultVideoEncoderFactory)
-                .setVideoDecoderFactory1(defaultVideoDecoderFactory)
-                .createPeerConnectionFactory1();
+                .setVideoEncoderFactory(encoderFactory)
+                .setVideoDecoderFactory(decoderFactory)
+                .createPeerConnectionFactory();
 
         //Now create a VideoCapturer instance.
         VideoCapturer videoCapturerAndroid;
