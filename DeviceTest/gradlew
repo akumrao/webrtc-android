@@ -7,11 +7,13 @@
 ##############################################################################
 
 
-#rm  -rf /Users/piasy/src/media/webrtc_repo/webrtc_android/src/out/android_studio/
+rm  -rf /Users/piasy/src/media/webrtc_repo/webrtc_android/src/out/android_studio/
 
-rm -rf   /root/AndroidStudioProjects/webrtc-android-codelab/Step-1/webrtc/.externalNativeBuild
+rm -rf   /root/AndroidStudioProjects/webrtc-android-codelab/Step-2/webrtc/.externalNativeBuild
 
-rm -rf   /root/AndroidStudioProjects/webrtc-android-codelab/Step-1/webrtc/.cxx
+rm -rf   /root/AndroidStudioProjects/webrtc-android-codelab/Step-2/app/build
+
+rm -rf   /root/AndroidStudioProjects/webrtc-android-codelab/Step-2/webrtc/.cxx
 
 # Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 DEFAULT_JVM_OPTS=""
