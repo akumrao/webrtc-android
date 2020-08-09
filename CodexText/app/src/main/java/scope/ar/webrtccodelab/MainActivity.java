@@ -1,5 +1,6 @@
 package scope.ar.webrtccodelab;
 
+import android.media.MediaCodecInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -12,6 +13,8 @@ import org.webrtc.CameraVideoCapturer;
 import org.webrtc.DefaultVideoDecoderFactory;
 import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
+import org.webrtc.HardwareVideoDecoderFactory;
+import org.webrtc.HardwareVideoEncoderFactory;
 import org.webrtc.IceCandidate;
 import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
@@ -25,6 +28,9 @@ import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
 //import org.webrtc.VideoCapturerAndroid;
 //import org.webrtc.VideoRenderer;
+import org.webrtc.VideoCodecInfo;
+import org.webrtc.VideoDecoderFactory;
+import org.webrtc.VideoEncoderFactory;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 import org.webrtc.Camera1Enumerator;
@@ -37,6 +43,8 @@ import org.webrtc.SurfaceViewRenderer;
 
 import org.webrtc.VideoSink;
 import org.webrtc.VideoFrame;
+
+import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -183,6 +191,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     private final MockLoggable mockLoggable = new MockLoggable();
 
+    private static final boolean ENABLE_INTEL_VP8_ENCODER = false;
+    private static final boolean ENABLE_H264_HIGH_PROFILE = false;
+
     public void start() {
         start.setEnabled(false);
         call.setEnabled(true);
@@ -209,19 +220,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         PeerConnectionFactory.Options options = new PeerConnectionFactory.Options();
-        DefaultVideoEncoderFactory defaultVideoEncoderFactory = new DefaultVideoEncoderFactory(
-                rootEglBase.getEglBaseContext(),  /* enableIntelVp8Encoder */true,  /* enableH264HighProfile */true);
-        DefaultVideoDecoderFactory defaultVideoDecoderFactory = new DefaultVideoDecoderFactory(rootEglBase.getEglBaseContext());
 
 
-       // MultiplexVideoEncoderFactory mVideoEncoderFactory = new MultiplexVideoEncoderFactory(defaultVideoEncoderFactory);
-       // MultiplexVideoDecoderFactory mtVideoDecoderFactory = new MultiplexVideoDecoderFactory(defaultVideoEncoderFactory);
+       // DefaultVideoEncoderFactory defaultVideoEncoderFactory = new DefaultVideoEncoderFactory(
+      //          rootEglBase.getEglBaseContext(),  /* enableIntelVp8Encoder */true,  /* enableH264HighProfile */true);
+
+        //DefaultVideoDecoderFactory defaultVideoDecoderFactory = new DefaultVideoDecoderFactory(rootEglBase.getEglBaseContext());
+//        // arvind
+    //    MultiplexVideoEncoderFactory mVideoEncoderFactory = new MultiplexVideoEncoderFactory(defaultVideoEncoderFactory);
+     //  MultiplexVideoDecoderFactory mtVideoDecoderFactory = new MultiplexVideoDecoderFactory(defaultVideoEncoderFactory);
+        //arvind
+
+   //      ArrayList<MediaCodecInfo> codecs = new ArrayList<>();
+
+
+
+
+        VideoEncoderFactory encoderFactory = new MultiplexVideoEncoderFactory(
+                rootEglBase.getEglBaseContext(), ENABLE_H264_HIGH_PROFILE);
+
+        VideoDecoderFactory decoderFactory = new MultiplexVideoDecoderFactory(rootEglBase.getEglBaseContext());
+
 
         peerConnectionFactory = PeerConnectionFactory.builder()
                 .setOptions(options)
-//                .setVideoEncoderFactory1(mVideoEncoderFactory)
-//                .setVideoDecoderFactory1(mtVideoDecoderFactory)
-                .createPeerConnectionFactory1();
+                .setVideoEncoderFactory(encoderFactory)
+                .setVideoDecoderFactory(decoderFactory)
+                .createPeerConnectionFactory();
 
 
         //Now create a VideoCapturer instance. Callback methods are there if you want to do something! Duh!
@@ -257,12 +282,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         localVideoView.setVisibility(View.VISIBLE);
         // And finally, with our VideoRenderer ready, we
         // can add our renderer to the VideoTrack.
-        localVideoTrack.addSink(localVideoView);
+
+       // localVideoTrack.addSink(localVideoView);
+
+        ProxyVideoSink localVideoSink = new ProxyVideoSink();
+        localVideoTrack.addSink(localVideoSink);
+        localVideoSink.setTarget(localVideoView);
+
 
         localVideoView.setMirror(true);
         remoteVideoView.setMirror(true);
 
 
+    }
+
+
+    private static class ProxyVideoSink implements VideoSink {
+        private VideoSink target;
+
+        @Override
+        synchronized public void onFrame(VideoFrame frame) {
+            if (target == null) {
+                Logging.d("TAG", "Dropping frame in proxy because target is null.");
+                return;
+            }
+
+            Logging.d("TAG", " w=" + Integer.toString(frame.getBuffer().getWidth()) + " h="  + Integer.toString(frame.getBuffer().getHeight())        );
+
+
+            target.onFrame(frame);
+        }
+
+        synchronized public void setTarget(VideoSink target) {
+            this.target = target;
+        }
     }
 
     private VideoCapturer createCameraCapturer(CameraEnumerator enumerator) {
@@ -320,7 +373,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sdpConstraints = new MediaConstraints();
         sdpConstraints.mandatory.add(new MediaConstraints.KeyValuePair("offerToReceiveAudio", "true"));
         sdpConstraints.mandatory.add(new MediaConstraints.KeyValuePair("offerToReceiveVideo", "true"));
-
 
 
 
