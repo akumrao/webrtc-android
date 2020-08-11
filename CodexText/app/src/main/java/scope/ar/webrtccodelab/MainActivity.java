@@ -1,7 +1,9 @@
 package scope.ar.webrtccodelab;
 
+import android.content.Context;
 import android.media.MediaCodecInfo;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -10,16 +12,19 @@ import android.widget.Button;
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.CameraVideoCapturer;
+import org.webrtc.CapturerObserver;
 import org.webrtc.DefaultVideoDecoderFactory;
 import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
 import org.webrtc.HardwareVideoDecoderFactory;
 import org.webrtc.HardwareVideoEncoderFactory;
 import org.webrtc.IceCandidate;
+import org.webrtc.JavaI420Buffer;
 import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
 import org.webrtc.MultiplexVideoDecoderFactory;
 import org.webrtc.MultiplexVideoEncoderFactory;
+//import org.webrtc.MultiplexVideoFrame;
 import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
 import org.webrtc.SdpObserver;
@@ -44,7 +49,11 @@ import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoSink;
 import org.webrtc.VideoFrame;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -112,27 +121,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    // Cycle through likely device names for the camera and return the first
-    // capturer that works, or crash if none do.
-//    private VideoCapturer getVideoCapturer(CameraVideoCapturer.CameraEventsHandler eventsHandler) {
-//        String[] cameraFacing = {"front", "back"};
-//        int[] cameraIndex = {0, 1};
-//        int[] cameraOrientation = {0, 90, 180, 270};
-//        for (String facing : cameraFacing) {
-//            for (int index : cameraIndex) {
-//                for (int orientation : cameraOrientation) {
-//                    String name = "Camera " + index + ", Facing " + facing +
-//                            ", Orientation " + orientation;
-//                    VideoCapturer capturer = VideoCapturerAndroid.create(name, eventsHandler);
-//                    if (capturer != null) {
-//                        Log.d("Using camera: ", name);
-//                        return capturer;
-//                    }
-//                }
-//            }
-//        }
-//        throw new RuntimeException("Failed to open capture");
-//    }
 
 
     @Override
@@ -194,7 +182,101 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final boolean ENABLE_INTEL_VP8_ENCODER = false;
     private static final boolean ENABLE_H264_HIGH_PROFILE = false;
 
-    public void start() {
+    public class MyVideoCapturer implements VideoCapturer {
+
+        private static final int frameWidth = 1024;
+        private static final int frameHeight = 720;
+
+
+            public VideoFrame getNextFrame() {
+                final long captureTimeNs = TimeUnit.MILLISECONDS.toNanos(SystemClock.elapsedRealtime());
+                final JavaI420Buffer buffer = JavaI420Buffer.allocate(frameWidth, frameHeight);
+                final ByteBuffer dataY = buffer.getDataY();
+                final ByteBuffer dataU = buffer.getDataU();
+                final ByteBuffer dataV = buffer.getDataV();
+                final int chromaHeight = (frameHeight + 1) / 2;
+                final int sizeY = frameHeight * buffer.getStrideY();
+                final int sizeU = chromaHeight * buffer.getStrideU();
+                final int sizeV = chromaHeight * buffer.getStrideV();
+
+
+                String str = "Arvind";
+                byte[] byteArr = str.getBytes();
+
+              //  buffer.setAugData(byteArr);
+               // buffer.setAugLen(str.length());
+                return new VideoFrame(buffer, 0 /* rotation */, captureTimeNs);
+            }
+
+           public void PushVideoFrame(VideoFrame videoFrame, byte[] SerializedCameraData, int length)
+           {
+               capturerObserver.onFrameCapturedAug(videoFrame, length, SerializedCameraData);
+           }
+
+//            @Override
+//            public void close() {
+//
+//            }
+
+        private final static String TAG = "MyVideoCapturer";
+        private CapturerObserver capturerObserver;
+        private final Timer timer = new Timer();
+
+        private final TimerTask tickTask = new TimerTask() {
+            @Override
+            public void run() {
+                tick();
+            }
+        };
+
+
+        public void tick() {
+            VideoFrame videoFrame = getNextFrame();
+
+            String str = "ArvindUmrao";
+            byte[] byteArr = str.getBytes();
+
+            PushVideoFrame(videoFrame, byteArr, str.length() );
+
+            //capturerObserver.onFrameCaptured(videoFrame);
+            videoFrame.release();
+        }
+
+        @Override
+        public void initialize(SurfaceTextureHelper surfaceTextureHelper, Context applicationContext,
+                               CapturerObserver capturerObserver) {
+            this.capturerObserver = capturerObserver;
+        }
+
+        @Override
+        public void startCapture(int width, int height, int framerate) {
+            timer.schedule(tickTask, 0, 1000 / framerate);
+        }
+
+        @Override
+        public void stopCapture() throws InterruptedException {
+            timer.cancel();
+        }
+
+        @Override
+        public void changeCaptureFormat(int width, int height, int framerate) {
+            // Empty on purpose
+        }
+
+        @Override
+        public void dispose() {
+
+        }
+
+        @Override
+        public boolean isScreencast() {
+            return false;
+        }
+
+    };
+
+
+        public void start() {
         start.setEnabled(false);
         call.setEnabled(true);
         //Initialize PeerConnectionFactory globals.
@@ -215,25 +297,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Create a new PeerConnectionFactory instance - using Hardware encoder and decoder.
 
 
-
-
-
-
         PeerConnectionFactory.Options options = new PeerConnectionFactory.Options();
-
-
-       // DefaultVideoEncoderFactory defaultVideoEncoderFactory = new DefaultVideoEncoderFactory(
-      //          rootEglBase.getEglBaseContext(),  /* enableIntelVp8Encoder */true,  /* enableH264HighProfile */true);
-
-        //DefaultVideoDecoderFactory defaultVideoDecoderFactory = new DefaultVideoDecoderFactory(rootEglBase.getEglBaseContext());
-//        // arvind
-    //    MultiplexVideoEncoderFactory mVideoEncoderFactory = new MultiplexVideoEncoderFactory(defaultVideoEncoderFactory);
-     //  MultiplexVideoDecoderFactory mtVideoDecoderFactory = new MultiplexVideoDecoderFactory(defaultVideoEncoderFactory);
-        //arvind
-
-   //      ArrayList<MediaCodecInfo> codecs = new ArrayList<>();
-
-
 
 
         VideoEncoderFactory encoderFactory = new MultiplexVideoEncoderFactory(
@@ -251,7 +315,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Now create a VideoCapturer instance. Callback methods are there if you want to do something! Duh!
         VideoCapturer videoCapturerAndroid;
-        videoCapturerAndroid = createCameraCapturer(new Camera1Enumerator(false));
+        videoCapturerAndroid = new MyVideoCapturer();  // for random buffer testing
+       // videoCapturerAndroid = createCameraCapturer(new Camera1Enumerator(false));  // for camera testing
 
 
 
@@ -283,11 +348,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // And finally, with our VideoRenderer ready, we
         // can add our renderer to the VideoTrack.
 
-       // localVideoTrack.addSink(localVideoView);
+        localVideoTrack.addSink(localVideoView);
 
-        ProxyVideoSink localVideoSink = new ProxyVideoSink();
-        localVideoTrack.addSink(localVideoSink);
-        localVideoSink.setTarget(localVideoView);
+//        ProxyVideoSink localVideoSink = new ProxyVideoSink();
+//        localVideoTrack.addSink(localVideoSink);
+//        localVideoSink.setTarget(localVideoView);
 
 
         localVideoView.setMirror(true);
@@ -301,16 +366,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         private VideoSink target;
 
         @Override
-        synchronized public void onFrame(VideoFrame frame) {
+        synchronized public void onFrame(VideoFrame frame,  int augLen, byte[] augData) {
             if (target == null) {
                 Logging.d("TAG", "Dropping frame in proxy because target is null.");
                 return;
             }
+            Logging.d("TAG",   " augLen=" + Integer.toString(augLen) +  " augData "+ new String(augData)   + " w=" + Integer.toString(frame.getBuffer().getWidth()) + " h="  + Integer.toString(frame.getBuffer().getHeight())        );
 
-            Logging.d("TAG", " w=" + Integer.toString(frame.getBuffer().getWidth()) + " h="  + Integer.toString(frame.getBuffer().getHeight())        );
 
-
-            target.onFrame(frame);
+            target.onFrame(frame , augLen, augData );
         }
 
         synchronized public void setTarget(VideoSink target) {
@@ -455,7 +519,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         runOnUiThread(() -> {
             try {
                 remoteVideoView.setVisibility(View.VISIBLE);
-                videoTrack.addSink(remoteVideoView);
+               // videoTrack.addSink(remoteVideoView);
+
+                 ProxyVideoSink localVideoSink = new ProxyVideoSink();
+                 videoTrack.addSink(localVideoSink);
+                 localVideoSink.setTarget(remoteVideoView);
+
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
