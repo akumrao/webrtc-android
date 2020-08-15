@@ -21,12 +21,11 @@ var io = socketIO.listen(app);
 io.sockets.on('connection', function(socket) {
 
   // convenience function to log server messages on the client
-  function log() {
+function log() {
     var array = ['Message from server:'];
     array.push.apply(array, arguments);
     socket.emit('log', array);
-   console.log("%o", array );
-
+    console.log(array);
   }
 
   socket.on('message', function(message) {
@@ -38,23 +37,30 @@ io.sockets.on('connection', function(socket) {
   socket.on('create or join', function(room) {
     log('Received request to create or join room ' + room);
 
-    var numClients = io.sockets.sockets.length;
+    var clientsInRoom = io.nsps['/'].adapter.rooms[room];
+    var numClients = clientsInRoom === undefined ? 0 : Object.keys(clientsInRoom).length; clientsInRoom = io.sockets.adapter.rooms[room];
+   // var numClients = clientsInRoom ? Object.keys(clientsInRoom.sockets).length : 0;
     log('Room ' + room + ' now has ' + numClients + ' client(s)');
 
-    if (numClients === 1) {
-      socket.join(room);
+    socket.join(room);
+    if (numClients === 0) {
+     
       log('Client ID ' + socket.id + ' created room ' + room);
       socket.emit('created', room, socket.id);
 
-    } else if (numClients === 2) {
+    } else if (numClients > 0) {
       log('Client ID ' + socket.id + ' joined room ' + room);
       io.sockets.in(room).emit('join', room);
-      socket.join(room);
+
       socket.emit('joined', room, socket.id);
       io.sockets.in(room).emit('ready');
-    } else { // max 5 clients
+    } else { // max two clients
       socket.emit('full', room);
     }
+
+
+
+
   });
 
   socket.on('ipaddr', function() {

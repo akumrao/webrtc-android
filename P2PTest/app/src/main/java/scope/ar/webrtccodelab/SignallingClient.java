@@ -82,7 +82,6 @@ class SignallingClient {
             //room created event.
             socket.on("created", args -> {
                 Log.d("SignallingClient", "created call() called with: args = [" + Arrays.toString(args) + "]");
-                isInitiator = true;
                 callback.onCreatedRoom();
             });
 
@@ -100,7 +99,9 @@ class SignallingClient {
             socket.on("joined", args -> {
                 Log.d("SignallingClient", "joined call() called with: args = [" + Arrays.toString(args) + "]");
                 isChannelReady = true;
+                isInitiator = true;
                 callback.onJoinedRoom();
+                callback.onTryToStart();
             });
 
             //log event
@@ -157,13 +158,13 @@ class SignallingClient {
 
     public void emitMessage(SessionDescription message) {
         try {
-            Log.d("SignallingClient", "emitMessage() called with: message = [" + message + "]");
+            Log.i("SignallingClient", "emitMessage() called with: message = [" + message + "]");
             JSONObject obj = new JSONObject();
             obj.put("type", message.type.canonicalForm());
             obj.put("sdp", message.description);
-            Log.d("emitMessage", obj.toString());
+            Log.i("emitMessage", obj.toString());
             socket.emit("message", obj);
-            Log.d("vivek1794", obj.toString());
+            Log.i("vivek1794", obj.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }

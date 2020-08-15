@@ -37,7 +37,7 @@ console.log('Attempted to create or join room', room);
 
 socket.on('created', function(room) {
   console.log('Created room ' + room);
-  isInitiator = true;
+  
 });
 
 socket.on('full', function(room) {
@@ -53,6 +53,8 @@ socket.on('join', function (room){
 socket.on('joined', function(room) {
   console.log('joined: ' + room);
   isChannelReady = true;
+  isInitiator = true;
+  maybeStart();
 });
 
 socket.on('log', function(array) {

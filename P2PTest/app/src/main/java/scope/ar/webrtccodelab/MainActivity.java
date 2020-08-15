@@ -200,6 +200,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void start() {
         // keep screen on
+
+        Log.e( TAG, " start and create  multiplex factory");
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         initViews();
@@ -282,6 +285,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     @Override
     public void onTryToStart() {
+        Log.e( TAG, "onTryToStart");
         runOnUiThread(() -> {
             if (!SignallingClient.getInstance().isStarted && localVideoTrack != null && SignallingClient.getInstance().isChannelReady) {
                 createPeerConnection();
@@ -341,6 +345,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * to remote peer
      */
     private void doCall() {
+        Log.e(TAG, "doCall");
         sdpConstraints = new MediaConstraints();
         sdpConstraints.mandatory.add(
                 new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
@@ -437,11 +442,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onNewPeerJoined() {
+        Log.e(TAG, "onNewPeerJoined");
         showToast("Remote Peer Joined");
     }
 
     @Override
     public void onRemoteHangUp(String msg) {
+        Log.e(TAG, "onRemoteHangUp");
         showToast("Remote Peer hungup");
         runOnUiThread(this::hangup);
     }
@@ -463,7 +470,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.OFFER, data.getString("sdp")));
                 Log.e("TAG", "setRemoteDescription.");
                 doAnswer();
-                Log.e("TAG", "doAnswer");
+               // Log.e("TAG", "doAnswer");
 
                 updateVideoViews(true);
             } catch (JSONException e) {
@@ -584,10 +591,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final String[] deviceNames = enumerator.getDeviceNames();
 
         // First, try to find front facing camera
-        Logging.d(TAG, "Looking for front facing cameras.");
+        Log.e(TAG, "Looking for front facing cameras.");
         for (String deviceName : deviceNames) {
             if (enumerator.isFrontFacing(deviceName)) {
-                Logging.d(TAG, "Creating front facing camera capturer.");
+                Log.e(TAG, "Creating front facing camera capturer.");
                 VideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
 
                 if (videoCapturer != null) {
@@ -597,10 +604,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         // Front facing camera not found, try something else
-        Logging.d(TAG, "Looking for other cameras.");
+        Log.e(TAG, "Looking for other cameras.");
         for (String deviceName : deviceNames) {
             if (!enumerator.isFrontFacing(deviceName)) {
-                Logging.d(TAG, "Creating other camera capturer.");
+                Log.e(TAG, "Creating other camera capturer.");
                 VideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
 
                 if (videoCapturer != null) {
