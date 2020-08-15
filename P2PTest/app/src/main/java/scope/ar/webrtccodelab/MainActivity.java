@@ -364,10 +364,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         synchronized public void onFrame(VideoFrame frame, int augLen, byte[] augData) {
             if (target == null) {
-                //  Logging.d("TAG", "Dropping frame in proxy because target is null.");
+                //  Log.e("TAG", "Dropping frame in proxy because target is null.");
                 return;
             }
-            // Logging.d("TAG",   " augLen=" + Integer.toString(augLen) +  " augData "+ new String(augData)   + " w=" + Integer.toString(frame.getBuffer().getWidth()) + " h="  + Integer.toString(frame.getBuffer().getHeight())        );
+            Log.e("TAG",   " augLen=" + Integer.toString(augLen) +  " augData "+ new String(augData)   + " w=" + Integer.toString(frame.getBuffer().getWidth()) + " h="  + Integer.toString(frame.getBuffer().getHeight())        );
 
 
 
@@ -385,6 +385,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void gotRemoteStream(MediaStream stream) {
         //we have remote video stream. add to the renderer.
+
+      Log.e(TAG, "gotRemoteStream");
+
         final VideoTrack videoTrack = stream.videoTracks.get(0);
         runOnUiThread(() -> {
             try {
@@ -449,6 +452,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onOfferReceived(final JSONObject data) {
         showToast("Received Offer");
+        Log.e("TAG", "onOfferReceived.");
+
         runOnUiThread(() -> {
             if (!SignallingClient.getInstance().isInitiator && !SignallingClient.getInstance().isStarted) {
                 onTryToStart();
@@ -456,7 +461,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             try {
                 localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.OFFER, data.getString("sdp")));
+                Log.e("TAG", "setRemoteDescription.");
                 doAnswer();
+                Log.e("TAG", "doAnswer");
+
                 updateVideoViews(true);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -465,10 +473,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void doAnswer() {
+        Log.e("TAG", "doAnswer.");
+
         localPeer.createAnswer(new CustomSdpObserver("localCreateAns") {
             @Override
             public void onCreateSuccess(SessionDescription sessionDescription) {
                 super.onCreateSuccess(sessionDescription);
+                Log.e("TAG", "setLocalDescription.");
                 localPeer.setLocalDescription(new CustomSdpObserver("localSetLocal"), sessionDescription);
                 SignallingClient.getInstance().emitMessage(sessionDescription);
             }
@@ -481,8 +492,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onAnswerReceived(JSONObject data) {
+
+        Log.e("TAG", "onAnswerReceived.");
+
         showToast("Received Answer");
         try {
+            Log.e("TAG", "setRemoteDescription");
             localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.fromCanonicalForm(data.getString("type").toLowerCase()), data.getString("sdp")));
             updateVideoViews(true);
         } catch (JSONException e) {
