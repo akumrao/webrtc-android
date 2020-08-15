@@ -267,11 +267,9 @@ task genWebrtcSrc(type: Exec) {
                     "--output_file ${webrtc_build_dir}/gen/sdk/android/generated_video_jni/VideoCodecStatus_jni.h " +
                     "--output_file ${webrtc_build_dir}/gen/sdk/android/generated_video_jni/VideoDecoder_jni.h " +
                     "--output_file ${webrtc_build_dir}/gen/sdk/android/generated_video_jni/VideoDecoderFactory_jni.h " +
-                    "--output_file ${webrtc_build_dir}/gen/sdk/android/generated_video_jni/MultiplexDecoderFactory_jni.h " +
                     "--output_file ${webrtc_build_dir}/gen/sdk/android/generated_video_jni/VideoDecoderFallback_jni.h " +
                     "--output_file ${webrtc_build_dir}/gen/sdk/android/generated_video_jni/VideoEncoder_jni.h " +
                     "--output_file ${webrtc_build_dir}/gen/sdk/android/generated_video_jni/VideoEncoderFactory_jni.h " +
-                    "--output_file ${webrtc_build_dir}/gen/sdk/android/generated_video_jni/MultiplexEncoderFactory_jni.h " +
                     "--output_file ${webrtc_build_dir}/gen/sdk/android/generated_video_jni/VideoEncoderFallback_jni.h " +
                     "--output_file ${webrtc_build_dir}/gen/sdk/android/generated_video_jni/VideoFrame_jni.h " +
                     "--output_file ${webrtc_build_dir}/gen/sdk/android/generated_video_jni/VideoSink_jni.h " +
@@ -295,11 +293,9 @@ task genWebrtcSrc(type: Exec) {
                     "--input_file sdk/android/api/org/webrtc/VideoCodecStatus.java " +
                     "--input_file sdk/android/api/org/webrtc/VideoDecoder.java " +
                     "--input_file sdk/android/api/org/webrtc/VideoDecoderFactory.java " +
-                    "--input_file sdk/android/api/org/webrtc/MultiplexDecoderFactory.java " +
                     "--input_file sdk/android/api/org/webrtc/VideoDecoderFallback.java " +
                     "--input_file sdk/android/api/org/webrtc/VideoEncoder.java " +
                     "--input_file sdk/android/api/org/webrtc/VideoEncoderFactory.java " +
-                    "--input_file sdk/android/api/org/webrtc/MultiplexEncoderFactory.java " +
                     "--input_file sdk/android/api/org/webrtc/VideoEncoderFallback.java " +
                     "--input_file sdk/android/api/org/webrtc/VideoFrame.java " +
                     "--input_file sdk/android/api/org/webrtc/VideoSink.java " +
