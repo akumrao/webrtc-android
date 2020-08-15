@@ -48,6 +48,8 @@ import org.webrtc.SessionDescription;
 import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
+import org.webrtc.VideoFrame;
+import org.webrtc.VideoSink;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
@@ -355,6 +357,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }, sdpConstraints);
     }
 
+
+    private static class ProxyVideoSink implements VideoSink {
+        private VideoSink target;
+
+        @Override
+        synchronized public void onFrame(VideoFrame frame, int augLen, byte[] augData) {
+            if (target == null) {
+                //  Logging.d("TAG", "Dropping frame in proxy because target is null.");
+                return;
+            }
+            // Logging.d("TAG",   " augLen=" + Integer.toString(augLen) +  " augData "+ new String(augData)   + " w=" + Integer.toString(frame.getBuffer().getWidth()) + " h="  + Integer.toString(frame.getBuffer().getHeight())        );
+
+
+
+
+            target.onFrame(frame , augLen, augData );
+        }
+
+        synchronized public void setTarget(VideoSink target) {
+            this.target = target;
+        }
+    }
+
     /**
      * Received remote peer's media stream. we will get the first video track and render it
      */
@@ -364,7 +389,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         runOnUiThread(() -> {
             try {
                 remoteVideoView.setVisibility(View.VISIBLE);
-                videoTrack.addSink(remoteVideoView);
+                //videoTrack.addSink(remoteVideoView);
+
+                ProxyVideoSink remoteVideoSink = new ProxyVideoSink();
+                videoTrack.addSink(remoteVideoSink);
+                remoteVideoSink.setTarget(remoteVideoView);
+
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
