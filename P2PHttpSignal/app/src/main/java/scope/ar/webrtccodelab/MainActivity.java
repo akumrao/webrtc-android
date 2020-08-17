@@ -206,11 +206,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         /// test HTTPSignalling
 
 
-       // HTTPSignalling mysignal;
-        // videoCapturerAndroid = new MyVideoCapturer();  // for random buffer testing
-       // mysignal = new HTTPSignalling();  // for camera testing
+        HTTPSignalling mysignal;
 
-       // mysignal.startCapture(1024, 720, 30);
+        mysignal = new HTTPSignalling("arvind1", "arvind1");  // for camera testing
+
+
+        mysignal.post("testing");
+
+
+        mysignal.startCapture(352 , 288, 1);
 
         ///////////////////////////////////////////////////////////////
 
@@ -274,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         localAudioTrack = peerConnectionFactory.createAudioTrack("101", audioSource);
 
         if (videoCapturerAndroid != null) {
-            videoCapturerAndroid.startCapture(1024, 720, 30);
+            videoCapturerAndroid.startCapture(1352 , 288, 30);
         }
 
         localVideoView.setVisibility(View.VISIBLE);
@@ -558,6 +562,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.end_call: {
                 hangup();
+                break;
+            }
+            case R.id.call: {
+                doCall();
                 break;
             }
         }

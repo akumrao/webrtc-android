@@ -25,13 +25,22 @@ public class HTTPSignalling {
 
     private static final String TAG = "HTTPSignalling";
 
+    private  String localUserId;
+    private  String remoteUserId;
+
+    HTTPSignalling(String localUserId, String remoteUserId )
+    {
+        this.localUserId = localUserId;
+        this.remoteUserId = remoteUserId;
+    }
+
 
     public class HTTPGet extends AsyncTask<String, Void, String> {
 
-        private String textView;
+        private String ret;
 
         public HTTPGet(String textView) {
-            this.textView = textView;
+            this.ret = textView;
         }
 
 
@@ -62,8 +71,8 @@ public class HTTPSignalling {
                         // depending on what type of message we get, we'll handle it differently
                         // this is the "glue" that allows two peers to establish a connection.
                         Log.e(TAG, builder.toString());
-
-                        String type = topLevel.getString("type");
+                        ret = builder.toString();
+                      //  String type = topLevel.getString("type");
 
                     }
 
@@ -72,16 +81,16 @@ public class HTTPSignalling {
                 urlConnection.disconnect();
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
-                Log.e(TAG, e.toString());
+              //  Log.e(TAG, e.toString());
             }
-            return "weather";
+            return ret;
         }
 
         @Override
         protected void onPostExecute(String temp) {
-            textView = temp;
+            ret = temp;
 
-            Log.e(TAG, textView);
+            Log.e(TAG, ret);
         }
     }
 
@@ -106,7 +115,7 @@ public class HTTPSignalling {
                 URL url = new URL(strings[0]);
                 urlConnection = (HttpURLConnection) url.openConnection();
 
-                InputStream stream = new BufferedInputStream(urlConnection.getInputStream());
+               // InputStream stream = new BufferedInputStream(urlConnection.getInputStream());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestProperty("Content-Type", "application/json");
@@ -122,7 +131,7 @@ public class HTTPSignalling {
                 writer.flush();
 
                 int code = urlConnection.getResponseCode();
-                if (code !=  201) {
+                if (code !=  200) {
                     throw new IOException("Invalid response from server: " + code);
                 }
 
@@ -167,7 +176,7 @@ public class HTTPSignalling {
 
     public void tick() {
 
-        String units = "/data/user1";
+        String units = "/data/" + localUserId;
         String url = String.format("http://192.168.0.9:3000%s",units);
 
         String textView = "test";
@@ -175,6 +184,29 @@ public class HTTPSignalling {
 
     }
 
+
+    public void post( String msg) {
+
+        String units = "/data/" + remoteUserId;
+        String url = String.format("http://192.168.0.9:3000%s",units);
+
+        String textView = "test";
+
+        //https://blog.codavel.com/how-to-integrate-httpurlconnection/
+
+        JSONObject postData = new JSONObject();
+        try {
+            postData.put("name", "morpheus");
+            postData.put("job", "leader");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
+        new HTTPpost(textView).execute(url, postData.toString());
+
+    }
 
 
     public void startCapture(int width, int height, int framerate) {

@@ -43,5 +43,13 @@
             android:layout_height="wrap_content"
             android:id="@+id/end_call"
             android:text="Hangup" />
+
+        <Button
+            android:id="@+id/call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:text="call" />
     </LinearLayout>
 </FrameLayout>
