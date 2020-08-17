@@ -203,6 +203,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Log.e( TAG, " start and create  multiplex factory");
 
+        /// test HTTPSignalling
+
+
+       // HTTPSignalling mysignal;
+        // videoCapturerAndroid = new MyVideoCapturer();  // for random buffer testing
+       // mysignal = new HTTPSignalling();  // for camera testing
+
+       // mysignal.startCapture(1024, 720, 30);
+
+        ///////////////////////////////////////////////////////////////
+
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         initViews();
@@ -373,9 +385,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return;
             }
             Log.e("TAG",   " augLen=" + Integer.toString(augLen) +  " augData "+ new String(augData)   + " w=" + Integer.toString(frame.getBuffer().getWidth()) + " h="  + Integer.toString(frame.getBuffer().getHeight())        );
-
-
-
 
             target.onFrame(frame , augLen, augData );
         }

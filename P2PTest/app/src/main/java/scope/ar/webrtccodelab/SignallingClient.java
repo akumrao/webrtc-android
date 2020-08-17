@@ -58,7 +58,7 @@ class SignallingClient {
         }
         if (instance.roomName == null) {
             //set the room name here
-            instance.roomName = "vivek17";
+            instance.roomName = "room1";
         }
         return instance;
     }
@@ -73,7 +73,7 @@ class SignallingClient {
             //set the socket.io url here
             socket = IO.socket("https://192.168.0.9:1794");
             socket.connect();
-            Log.d("SignallingClient", "init() called");
+            Log.e("SignallingClient", "init() called");
 
             if (!roomName.isEmpty()) {
                 emitInitStatement(roomName);
@@ -81,23 +81,23 @@ class SignallingClient {
 
             //room created event.
             socket.on("created", args -> {
-                Log.d("SignallingClient", "created call() called with: args = [" + Arrays.toString(args) + "]");
+                Log.e("SignallingClient", "created call() called with: args = [" + Arrays.toString(args) + "]");
                 callback.onCreatedRoom();
             });
 
             //room is full event
-            socket.on("full", args -> Log.d("SignallingClient", "full call() called with: args = [" + Arrays.toString(args) + "]"));
+            socket.on("full", args -> Log.e("SignallingClient", "full call() called with: args = [" + Arrays.toString(args) + "]"));
 
             //peer joined event
             socket.on("join", args -> {
-                Log.d("SignallingClient", "join call() called with: args = [" + Arrays.toString(args) + "]");
+                Log.e("SignallingClient", "join call() called with: args = [" + Arrays.toString(args) + "]");
                 isChannelReady = true;
                 callback.onNewPeerJoined();
             });
 
             //when you joined a chat room successfully
             socket.on("joined", args -> {
-                Log.d("SignallingClient", "joined call() called with: args = [" + Arrays.toString(args) + "]");
+                Log.e("SignallingClient", "joined call() called with: args = [" + Arrays.toString(args) + "]");
                 isChannelReady = true;
                 isInitiator = true;
                 callback.onJoinedRoom();
@@ -105,16 +105,16 @@ class SignallingClient {
             });
 
             //log event
-            socket.on("log", args -> Log.d("SignallingClient", "log call() called with: args = [" + Arrays.toString(args) + "]"));
+            socket.on("log", args -> Log.e("SignallingClient", "log call() called with: args = [" + Arrays.toString(args) + "]"));
 
             //bye event
             socket.on("bye", args -> callback.onRemoteHangUp((String) args[0]));
 
             //messages - SDP and ICE candidates are transferred through this
             socket.on("message", args -> {
-                Log.d("SignallingClient", "message call() called with: args = [" + Arrays.toString(args) + "]");
+                Log.e("SignallingClient", "message call() called with: args = [" + Arrays.toString(args) + "]");
                 if (args[0] instanceof String) {
-                    Log.d("SignallingClient", "String received :: " + args[0]);
+                    Log.e("SignallingClient", "String received :: " + args[0]);
                     String data = (String) args[0];
                     if (data.equalsIgnoreCase("got user media")) {
                         callback.onTryToStart();
@@ -126,7 +126,7 @@ class SignallingClient {
                     try {
 
                         JSONObject data = (JSONObject) args[0];
-                        Log.d("SignallingClient", "Json Received :: " + data.toString());
+                        Log.e("SignallingClient", "Json Received :: " + data.toString());
                         String type = data.getString("type");
                         if (type.equalsIgnoreCase("offer")) {
                             callback.onOfferReceived(data);
@@ -147,12 +147,12 @@ class SignallingClient {
     }
 
     private void emitInitStatement(String message) {
-        Log.d("SignallingClient", "emitInitStatement() called with: event = [" + "create or join" + "], message = [" + message + "]");
+        Log.e("SignallingClient", "emitInitStatement() called with: event = [" + "create or join" + "], message = [" + message + "]");
         socket.emit("create or join", message);
     }
 
     public void emitMessage(String message) {
-        Log.d("SignallingClient", "emitMessage() called with: message = [" + message + "]");
+        Log.e("SignallingClient", "emitMessage() called with: message = [" + message + "]");
         socket.emit("message", message);
     }
 
@@ -164,7 +164,7 @@ class SignallingClient {
             obj.put("sdp", message.description);
             Log.i("emitMessage", obj.toString());
             socket.emit("message", obj);
-            Log.i("vivek1794", obj.toString());
+            Log.i("room194", obj.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
