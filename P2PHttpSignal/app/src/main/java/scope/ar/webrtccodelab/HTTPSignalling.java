@@ -6,6 +6,8 @@ import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.webrtc.IceCandidate;
+import org.webrtc.SessionDescription;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -21,6 +23,8 @@ import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import io.socket.client.Socket;
+
 public class HTTPSignalling {
 
     private static final String TAG = "HTTPSignalling";
@@ -28,10 +32,36 @@ public class HTTPSignalling {
     private  String localUserId;
     private  String remoteUserId;
 
-    HTTPSignalling(String localUserId, String remoteUserId )
-    {
+    private SignalingInterface callback;
+    private static HTTPSignalling instance;
+
+//    HTTPSignalling(SignalingInterface signalingInterface, String localUserId, String remoteUserId )
+//    {
+//        this.localUserId = localUserId;
+//        this.remoteUserId = remoteUserId;
+//
+//        this.callback = signalingInterface;
+//    }
+
+    public void init(SignalingInterface signalingInterface, String localUserId, String remoteUserId) {
+        this.callback = signalingInterface;
+
         this.localUserId = localUserId;
         this.remoteUserId = remoteUserId;
+
+        startCapture(352 , 288, 1);
+
+    }
+
+    public static HTTPSignalling getInstance() {
+        if (instance == null) {
+            instance = new HTTPSignalling();
+        }
+//        if (instance.roomName == null) {
+//            //set the room name here
+//            instance.roomName = "room1";
+//        }
+        return instance;
     }
 
 
@@ -55,42 +85,73 @@ public class HTTPSignalling {
                 InputStream stream = new BufferedInputStream(urlConnection.getInputStream());
 
                 int code = urlConnection.getResponseCode();
+                StringBuilder builder = new StringBuilder();
                 if (code == 200) {
 
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream));
-                    StringBuilder builder = new StringBuilder();
+
 
                     String inputString;
                     while ((inputString = bufferedReader.readLine()) != null) {
                         builder.append(inputString);
                     }
 
-                    JSONObject topLevel = new JSONObject(builder.toString());
-
-                    if (topLevel != null) {
-                        // depending on what type of message we get, we'll handle it differently
-                        // this is the "glue" that allows two peers to establish a connection.
-                        Log.e(TAG, builder.toString());
-                        ret = builder.toString();
-                      //  String type = topLevel.getString("type");
-
-                    }
-
+                    return  builder.toString();
 
                 }
                 urlConnection.disconnect();
-            } catch (IOException | JSONException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
               //  Log.e(TAG, e.toString());
             }
-            return ret;
+            return "";
         }
 
         @Override
         protected void onPostExecute(String temp) {
-            ret = temp;
 
-            Log.e(TAG, ret);
+            Log.e(TAG, temp);
+
+            if(!temp.isEmpty()) {
+
+                try {
+                    JSONObject topLevel = new JSONObject(temp);
+
+                    int type = topLevel.optInt( "MessageType");
+
+                    String data = topLevel.optString("Data");
+
+                    Log.e( TAG, "Received SDP message: type=" + type);
+                    switch (type)
+                    {
+                        case 1:
+                            callback.onOfferReceived(data);
+                            // if we get an offer, we immediately send an answer
+                            break;
+                        case 2:
+                            //connectionWrangler.SetRemoteDescription("answer", msg.Data);
+                            callback.onAnswerReceived(data);
+                            break;
+                        case 3:
+                            // this "parts" protocol is defined above, in OnIceCandiateReadyToSend listener
+                            //var parts = msg.Data.Split(new string[] { msg.IceDataSeparator }, StringSplitOptions.RemoveEmptyEntries);
+                            //connectionWrangler.AddIceCandidate(parts[0], int.Parse(parts[1]), parts[2]);
+                            String sep = topLevel.optString("IceDataSeparator");
+                            String[] separated = data.split("[" + sep + "]");
+
+                            callback.onIceCandidateReceived(separated);
+
+                            break;
+                        default:
+                            Log.e( TAG, "Unknown message: " +  temp);
+                            break;
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
     }
 
@@ -99,10 +160,9 @@ public class HTTPSignalling {
 
     public class HTTPpost extends AsyncTask<String, Void, String> {
 
-        private String textView;
 
-        public HTTPpost(String textView) {
-            this.textView = textView;
+        public HTTPpost() {
+
         }
 
 
@@ -190,22 +250,52 @@ public class HTTPSignalling {
         String units = "/data/" + remoteUserId;
         String url = String.format("http://192.168.0.9:3000%s",units);
 
-        String textView = "test";
 
-        //https://blog.codavel.com/how-to-integrate-httpurlconnection/
+        new HTTPpost().execute(url, msg);
+    }
 
-        JSONObject postData = new JSONObject();
+    public void emitMessage(SessionDescription message) {
         try {
-            postData.put("name", "morpheus");
-            postData.put("job", "leader");
+            Log.i("SignallingClient", "emitMessage() called with: message = [" + message + "]");
+            JSONObject obj = new JSONObject();
+            int msgType=9;
+            if (  message.type.canonicalForm() == "offer")
+            {
+                msgType = 1;
+            }
+            else if (  message.type.canonicalForm() == "answer")
+            {
+                msgType = 2;
+            }
+            else{
+                Log.e("TAG", "Invalid state, this conditon should not come");
+            }
+
+
+            obj.put("MessageType", msgType);
+            obj.put("Data", message.description);
+            Log.i("emitMessage", obj.toString());
+            post( obj.toString() );
+            Log.i("room194", obj.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
 
+    public void emitIceCandidate(IceCandidate iceCandidate) {
+        try {
 
+            String Data = iceCandidate.sdp + "|" +  Integer.toString(iceCandidate.sdpMLineIndex)  + "|" + iceCandidate.sdpMid;
 
-        new HTTPpost(textView).execute(url, postData.toString());
-
+            JSONObject object = new JSONObject();
+            object.put("MessageType", 3);
+            object.put("Data", Data);
+            object.put("IceDataSeparator",  "|");
+            post( object.toString() );
+            //socket.emit("message", object);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -218,4 +308,25 @@ public class HTTPSignalling {
     }
 
 
+    public void close() {
+        timer.cancel();
+    }
+
+    interface SignalingInterface {
+        void onRemoteHangUp(String msg);
+
+        void onOfferReceived(String data);
+
+        void onAnswerReceived(String data);
+
+        void onIceCandidateReceived( String[] data);
+
+        void onTryToStart();
+
+        void onCreatedRoom();
+
+        void onJoinedRoom();
+
+        void onNewPeerJoined();
+    }
 }

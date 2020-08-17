@@ -70,7 +70,7 @@ import java.util.logging.Logger;
 
 
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, SignallingClient.SignalingInterface {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, HTTPSignalling.SignalingInterface {
     PeerConnectionFactory peerConnectionFactory;
     MediaConstraints audioConstraints;
     MediaConstraints videoConstraints;
@@ -206,15 +206,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         /// test HTTPSignalling
 
 
-        HTTPSignalling mysignal;
+        //HTTPSignalling mysignal;
 
-        mysignal = new HTTPSignalling("arvind1", "arvind1");  // for camera testing
-
-
-        mysignal.post("testing");
+        //mysignal = new HTTPSignalling( this,"arvind1", "arvind1");  // for camera testing
 
 
-        mysignal.startCapture(352 , 288, 1);
+       /// mysignal.post("testing");
+
+
+
 
         ///////////////////////////////////////////////////////////////
 
@@ -225,9 +225,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initVideos();
         getIceServers();
 
-        SignallingClient.getInstance().init(this);
-
-
+        HTTPSignalling.getInstance().init(this, "arvind2", "arvind1" );
 
         PeerConnectionFactory.initialize(
                 org.webrtc.PeerConnectionFactory.InitializationOptions.builder(this)
@@ -278,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         localAudioTrack = peerConnectionFactory.createAudioTrack("101", audioSource);
 
         if (videoCapturerAndroid != null) {
-            videoCapturerAndroid.startCapture(1352 , 288, 30);
+            videoCapturerAndroid.startCapture(352 , 288, 30);
         }
 
         localVideoView.setVisibility(View.VISIBLE);
@@ -290,9 +288,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         remoteVideoView.setMirror(true);
 
         gotUserMedia = true;
-        if (SignallingClient.getInstance().isInitiator) {
+       // if (HTTPSignalling.getInstance().isInitiator) {
             onTryToStart();
-        }
+       // }
     }
 
     /**
@@ -301,16 +299,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     @Override
     public void onTryToStart() {
-        Log.e( TAG, "onTryToStart");
-        runOnUiThread(() -> {
-            if (!SignallingClient.getInstance().isStarted && localVideoTrack != null && SignallingClient.getInstance().isChannelReady) {
-                createPeerConnection();
-                SignallingClient.getInstance().isStarted = true;
-                if (SignallingClient.getInstance().isInitiator) {
-                    doCall();
-                }
-            }
-        });
+       // Log.e( TAG, "onTryToStart");
+        //runOnUiThread(() -> {
+                      createPeerConnection();
+
+//                if (HTTPSignalling.getInstance().isInitiator) {
+//                    doCall();
+//                }
+       // });
     }
 
     /**
@@ -324,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new PeerConnection.RTCConfiguration(peerIceServers);
         // TCP candidates are only useful when connecting to a server that supports
         // ICE-TCP.
-        rtcConfig.tcpCandidatePolicy = PeerConnection.TcpCandidatePolicy.DISABLED;
+        rtcConfig.tcpCandidatePolicy = PeerConnection.TcpCandidatePolicy.ENABLED;
         rtcConfig.bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE;
         rtcConfig.rtcpMuxPolicy = PeerConnection.RtcpMuxPolicy.REQUIRE;
         rtcConfig.continualGatheringPolicy = PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY;
@@ -375,8 +371,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onCreateSuccess(SessionDescription sessionDescription) {
                 super.onCreateSuccess(sessionDescription);
                 localPeer.setLocalDescription(new CustomSdpObserver("localSetLocalDesc"), sessionDescription);
-                Log.d("onCreateSuccess", "SignallingClient emit ");
-                SignallingClient.getInstance().emitMessage(sessionDescription);
+                Log.d("onCreateSuccess", "HTTPSignalling emit ");
+                HTTPSignalling.getInstance().emitMessage(sessionDescription);
             }
         }, sdpConstraints);
     }
@@ -431,7 +427,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     public void onIceCandidateReceived(IceCandidate iceCandidate) {
         //we have received ice candidate. We can set it to the other peer.
-        SignallingClient.getInstance().emitIceCandidate(iceCandidate);
+        HTTPSignalling.getInstance().emitIceCandidate(iceCandidate);
     }
 
     /**
@@ -441,7 +437,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onCreatedRoom() {
         showToast("You created the room " + gotUserMedia);
         if (gotUserMedia) {
-            SignallingClient.getInstance().emitMessage("got user media");
+           // HTTPSignalling.getInstance().emitMessage("got user media");
         }
     }
 
@@ -452,7 +448,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onJoinedRoom() {
         showToast("You joined the room " + gotUserMedia);
         if (gotUserMedia) {
-            SignallingClient.getInstance().emitMessage("got user media");
+           // HTTPSignalling.getInstance().emitMessage("got user media");
         }
     }
 
@@ -473,25 +469,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * SignallingCallback - Called when remote peer sends offer
      */
     @Override
-    public void onOfferReceived(final JSONObject data) {
+    public void onOfferReceived(final String data) {
         showToast("Received Offer");
         Log.e("TAG", "onOfferReceived.");
 
         runOnUiThread(() -> {
-            if (!SignallingClient.getInstance().isInitiator && !SignallingClient.getInstance().isStarted) {
-                onTryToStart();
-            }
+//            if (!HTTPSignalling.getInstance().isInitiator && !HTTPSignalling.getInstance().isStarted) {
+//                onTryToStart();
+//            }
 
-            try {
-                localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.OFFER, data.getString("sdp")));
+
+                localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.OFFER, data));
                 Log.e("TAG", "setRemoteDescription.");
                 doAnswer();
                // Log.e("TAG", "doAnswer");
 
                 updateVideoViews(true);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+
         });
     }
 
@@ -504,7 +498,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 super.onCreateSuccess(sessionDescription);
                 Log.e("TAG", "setLocalDescription.");
                 localPeer.setLocalDescription(new CustomSdpObserver("localSetLocal"), sessionDescription);
-                SignallingClient.getInstance().emitMessage(sessionDescription);
+                HTTPSignalling.getInstance().emitMessage(sessionDescription);
             }
         }, new MediaConstraints());
     }
@@ -514,30 +508,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
 
     @Override
-    public void onAnswerReceived(JSONObject data) {
+    public void onAnswerReceived(String data) {
 
         Log.e("TAG", "onAnswerReceived.");
 
         showToast("Received Answer");
-        try {
+
             Log.e("TAG", "setRemoteDescription");
-            localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.fromCanonicalForm(data.getString("type").toLowerCase()), data.getString("sdp")));
+            localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.ANSWER, data));
             updateVideoViews(true);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+
     }
 
     /**
      * Remote IceCandidate received
      */
     @Override
-    public void onIceCandidateReceived(JSONObject data) {
-        try {
-            localPeer.addIceCandidate(new IceCandidate(data.getString("id"), data.getInt("label"), data.getString("candidate")));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    public void onIceCandidateReceived( String[] data) {
+            localPeer.addIceCandidate(new IceCandidate(data[2],  Integer.parseInt(data[1]) , data[0]));
     }
 
     private void updateVideoViews(final boolean remoteVisible) {
@@ -565,7 +553,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.call: {
-                doCall();
+                runOnUiThread(() -> {
+
+                   doCall();
+                });
                 break;
             }
         }
@@ -577,7 +568,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 localPeer.close();
             }
             localPeer = null;
-            SignallingClient.getInstance().close();
+            HTTPSignalling.getInstance().close();
             updateVideoViews(false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -586,7 +577,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onDestroy() {
-        SignallingClient.getInstance().close();
+        HTTPSignalling.getInstance().close();
         super.onDestroy();
 
         if (surfaceTextureHelper != null) {
