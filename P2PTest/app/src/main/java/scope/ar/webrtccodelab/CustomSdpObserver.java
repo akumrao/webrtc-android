@@ -7,7 +7,7 @@ import org.webrtc.SessionDescription;
 
 /**
  * Webrtc_Step2
- * Created by vivek-3102 on 11/03/17.
+
  */
 
 class CustomSdpObserver implements SdpObserver {

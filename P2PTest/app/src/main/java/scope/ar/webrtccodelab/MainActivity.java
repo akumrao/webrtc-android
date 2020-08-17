@@ -313,6 +313,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * Creating the local peerconnection instance
      */
     private void createPeerConnection() {
+
+        Log.e(TAG, "createPeerConnection");
+
         PeerConnection.RTCConfiguration rtcConfig =
                 new PeerConnection.RTCConfiguration(peerIceServers);
         // TCP candidates are only useful when connecting to a server that supports
