@@ -198,21 +198,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Log.e( TAG, " start and create  multiplex factory");
 
-        /// test HTTPSignalling
-
-
-        //HTTPSignalling mysignal;
-
-        //mysignal = new HTTPSignalling( this,"arvind1", "arvind1");  // for camera testing
-
-
-       /// mysignal.post("testing");
-
-
-
-
-        ///////////////////////////////////////////////////////////////
-
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -315,10 +300,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new PeerConnection.RTCConfiguration(peerIceServers);
         // TCP candidates are only useful when connecting to a server that supports
         // ICE-TCP.
-        rtcConfig.tcpCandidatePolicy = PeerConnection.TcpCandidatePolicy.ENABLED;
+        rtcConfig.tcpCandidatePolicy = PeerConnection.TcpCandidatePolicy.DISABLED;
         rtcConfig.bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE;
         rtcConfig.rtcpMuxPolicy = PeerConnection.RtcpMuxPolicy.REQUIRE;
-        rtcConfig.continualGatheringPolicy = PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY;
+      //  rtcConfig.continualGatheringPolicy = PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY;
         // Use ECDSA encryption.
         rtcConfig.keyType = PeerConnection.KeyType.ECDSA;
         localPeer = peerConnectionFactory.createPeerConnection(rtcConfig, new CustomPeerConnectionObserver("localPeerCreation") {
