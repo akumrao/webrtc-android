@@ -17,24 +17,14 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.Camera1Enumerator;
 import org.webrtc.CameraEnumerator;
 import org.webrtc.MultiplexVideoDecoderFactory;
 import org.webrtc.MultiplexVideoEncoderFactory;
-import org.webrtc.VideoCodecInfo;
 import org.webrtc.VideoDecoderFactory;
 import org.webrtc.VideoEncoderFactory;
-
-
-import org.webrtc.BuiltinAudioEncoderFactoryFactory;
-
-import org.webrtc.DefaultVideoEncoderFactory;
-import org.webrtc.DefaultVideoDecoderFactory;
-
 
 
 import org.webrtc.EglBase;
@@ -85,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     SurfaceViewRenderer remoteVideoView;
 
     Button hangup;
+    Button makecall;
     PeerConnection localPeer;
     List<IceServer> iceServers;
     EglBase rootEglBase;
@@ -130,6 +121,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         localVideoView = findViewById(R.id.local_gl_surface_view);
         remoteVideoView = findViewById(R.id.remote_gl_surface_view);
         hangup.setOnClickListener(this);
+
+        makecall = findViewById(R.id.start_call);
+        makecall.setOnClickListener(this);
+
     }
 
     private void initVideos() {
@@ -196,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     private final MockLoggable mockLoggable = new MockLoggable();
 
-    private static final boolean ENABLE_H264_HIGH_PROFILE = false;
+    private static final boolean ENABLE_H264_HIGH_PROFILE = true;
 
     public void start() {
         // keep screen on
@@ -225,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initVideos();
         getIceServers();
 
-        HTTPSignalling.getInstance().init(this, "arvind2", "arvind1" );
+        HTTPSignalling.getInstance().init(this, "arvind1", "arvind2" );
 
         PeerConnectionFactory.initialize(
                 org.webrtc.PeerConnectionFactory.InitializationOptions.builder(this)
@@ -552,7 +547,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 hangup();
                 break;
             }
-            case R.id.call: {
+            case R.id.start_call: {
                 runOnUiThread(() -> {
 
                    doCall();

@@ -366,6 +366,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
         sdpConstraints.mandatory.add(
                 new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
+
+        Log.e(TAG, "createOffer");
         localPeer.createOffer(new CustomSdpObserver("localCreateOffer") {
             @Override
             public void onCreateSuccess(SessionDescription sessionDescription) {

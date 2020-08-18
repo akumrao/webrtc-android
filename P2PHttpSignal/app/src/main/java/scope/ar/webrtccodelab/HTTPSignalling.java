@@ -101,7 +101,7 @@ public class HTTPSignalling {
                 }
                 urlConnection.disconnect();
             } catch (IOException e) {
-                e.printStackTrace();
+               // e.printStackTrace();
               //  Log.e(TAG, e.toString());
             }
             return "";
@@ -237,7 +237,7 @@ public class HTTPSignalling {
     public void tick() {
 
         String units = "/data/" + localUserId;
-        String url = String.format("http://192.168.0.9:3000%s",units);
+        String url = String.format("http://192.168.0.16:3000%s",units);
 
         String textView = "test";
         new HTTPGet(textView).execute(url);
@@ -248,7 +248,7 @@ public class HTTPSignalling {
     public void post( String msg) {
 
         String units = "/data/" + remoteUserId;
-        String url = String.format("http://192.168.0.9:3000%s",units);
+        String url = String.format("http://192.168.0.16:3000%s",units);
 
 
         new HTTPpost().execute(url, msg);
@@ -258,12 +258,13 @@ public class HTTPSignalling {
         try {
             Log.i("SignallingClient", "emitMessage() called with: message = [" + message + "]");
             JSONObject obj = new JSONObject();
+
             int msgType=9;
-            if (  message.type.canonicalForm() == "offer")
+            if (  message.type.canonicalForm().equals("offer"))
             {
                 msgType = 1;
             }
-            else if (  message.type.canonicalForm() == "answer")
+            else if (  message.type.canonicalForm().equals("answer"))
             {
                 msgType = 2;
             }
