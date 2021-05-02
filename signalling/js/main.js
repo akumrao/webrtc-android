@@ -81,7 +81,7 @@ socket.on('message', function(message) {
     pc.setRemoteDescription(new RTCSessionDescription(message));
     doAnswer();
   } else if (message.type === 'answer' && isStarted) {
-    console.log("received answer");
+    console.log("received answer %o",  message.sdp);
     pc.setRemoteDescription(new RTCSessionDescription(message));
   } else if (message.type === 'candidate' && isStarted) {
     var candidate = new RTCIceCandidate({
@@ -160,6 +160,35 @@ window.onbeforeunload = function() {
 function createPeerConnection() {
   try {
     pc = new RTCPeerConnection(null);
+
+
+   var channelSnd = pc.createDataChannel("chat"); // sende PC1 
+    
+    channelSnd.onopen = function(event)
+    {
+        channelSnd.send('Hi you!');
+    }
+    
+    channelSnd.onmessage = function(event)
+    {
+        console.log("arvind " + event.data);
+    }
+
+
+
+    pc.ondatachannel = function(event) {  // receiver /PC2
+    var channel = event.channel;
+    channel.onopen = function(event) {
+    channel.send('ravind back!');
+    }
+    channel.onmessage = function(event) {
+    console.log("ravind " + event.data);
+    }
+    }
+
+
+
+
     pc.onicecandidate = handleIceCandidate;
     if ('ontrack' in pc) {
       pc.ontrack = handleRemoteStreamAdded;
@@ -222,7 +251,7 @@ function setLocalAndSendMessage(sessionDescription) {
   // Set Opus as the preferred codec in SDP if Opus is present.
   //  sessionDescription.sdp = preferOpus(sessionDescription.sdp);
   pc.setLocalDescription(sessionDescription);
-  console.log('setLocalAndSendMessage sending message', sessionDescription);
+  console.log(' type %o  sdp %o', sessionDescription.type, sessionDescription.sdp);
   sendMessage(sessionDescription);
 }
 
