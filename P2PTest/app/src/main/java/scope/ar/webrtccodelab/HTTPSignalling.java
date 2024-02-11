@@ -168,7 +168,7 @@ public class HTTPSignalling {
     public void tick() {
 
         String units = "/data/user1";
-        String url = String.format("http://192.168.0.9:3000%s",units);
+        String url = String.format("http://192.168.0.19:3000%s",units);
 
         String textView = "test";
         new HTTPGet(textView).execute(url);

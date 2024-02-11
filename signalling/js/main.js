@@ -31,7 +31,7 @@ if (room === '') {
   room = 'room1';
 }
 
-var socket = io.connect("https://192.168.0.9:1794");
+var socket = io.connect("https://192.168.0.19:1794");
 socket.emit('create or join', room);
 console.log('Attempted to create or join room', room);
 

@@ -12,7 +12,7 @@ The test setup contains of three components:
 2. WebRTC Android App
 3. WebRTC example web site
 
-Important: The IP address of the signaling server is hardcoded to `192.168.0.9` and need to be changed in files `SignallingClient.java` and `main.js`.
+Important: The IP address of the signaling server is hardcoded to `192.168.0.19` and need to be changed in files `SignallingClient.java` and `main.js`.
 
 ### Build Android App Client
 
@@ -54,5 +54,5 @@ openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out c
 
 
 
-Now open `https://192.168.0.9:8000` in the CHROME browser.
+Now open `https://192.168.0.19:8000` in the CHROME browser.
 You can use a different web server as the python buildin, of course.

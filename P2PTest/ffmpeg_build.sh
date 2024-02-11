@@ -4,8 +4,8 @@
 
 # Android
 
-WEBRTC_NDK=/Users/piasy/src/media/webrtc_repo/webrtc_android/src/third_party/android_ndk
-TOOLCHAIN=${WEBRTC_NDK}/toolchains/llvm/prebuilt/darwin-x86_64
+WEBRTC_NDK=/experiment/webrtc_android/src/third_party/android_ndk
+TOOLCHAIN=${WEBRTC_NDK}/toolchains/llvm/prebuilt/linux-x86_64
 
 ./configure \
 --ar=${TOOLCHAIN}/bin/arm-linux-androideabi-ar \
