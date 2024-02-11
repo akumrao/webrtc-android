@@ -1,27 +1,53 @@
-# WebRTC Android Studio project
+# Android Webrtc APP
 
-A reference gradle project that let you explore WebRTC Android in Android Studio.
+## Enable USB debugger of Android
 
-## Debug native code in Android Studio
+1. Enable Android setting, about and then tap version detail for 6 & 7 times till debug option is enable
+2. Click USB Debugger
 
-_break since #30771._
 
-Edit `gradle.properties`, set `compile_native_code=true` and other variables according to your WebRTC checkout location, then enjoy :)
+## login to linux and windows connect USB 
 
-Note:
+adb devices  
 
-+ You need download and sync WebRTC repo by yourself, this project won't do that for you;
-+ Checkout the same WebRTC commit as this project does, which is [#30987](https://webrtc.googlesource.com/src/+/04c1b445019e10e54b96f70403d25cc54215faf3);
-+ Use the same version of Android SDK and NDK as WebRTC does;
-+ (re)Create `protoc` after updating WebRTC repo, to create the `protoc` program, you need build WebRTC Android via ninja once, let's assume the output dir is `out/android_ninja`, then the `protoc` will be `out/android_ninja/clang_x64/protoc`;
-+ Delete `webrtc_build_dir` after updating WebRTC repo;
+List of devices attached
 
-## WebRTC src extractor
+* daemon started successfully
 
-`python3 webrtc_src_extractor.py <repo dir> <dst dir> <wanted src file, seperated by space>`
+2447cae5	device
 
-If you only want use a small part of WebRTC code, this script could help you find all related sources and headers, and copy them into `dst dir`. Note that it's just a best effort script, you may still need copy some files manually.
+ adb -s  2447cae5 shell
 
-## Caveat
+ adb logcat -s "libjingle"
 
-+ Delete `webrtc_build_dir` and `.externalNativeBuild`, run `./gradlew genWebrtcSrc`, and "Refresh Linked C++ Projects" (note that "Sync Project with Gradle Files" won't work) before your build and debug, otherwise the generated sources may not be compiled, undefined reference error will happen, e.g. `webrtc::rtclog::Event` related references;
+ adb uninstall adappt.ar.webrtccodelab
+
+adb install app-debug.apk
+
+
+# Browse 
+https://192.168.0.19:1794/
+
+add room
+
+
+## Simillar links 
+
+https://vivekc.xyz/getting-started-with-webrtc-for-android-daab1e268ff4
+
+http://leadtosilverlining.blogspot.com/2018/04/how-to-build-android-webrtc-mobile-app.html
+
+https://github.com/njovy/AppRTCDemo
+
+http://webrtc.github.io/webrtc-org/native-code/android/
+
+https://github.com/SD810/webrtc_example_android_app
+
+https://github.com/ISBX/apprtc-node-server
+
+https://github.com/Androidhacks7/AppRTC-Android
+
+This is working example of WebRTC app from [official webrtc src](https://webrtc.googlesource.com/src/+/refs/heads/master/examples/androidapp/) which can be built with the latest Android Studio(3.6.3).
+
+This app uses a dependency to latest webrtc Android library: org.webrtc:google-webrtc:1.0.32006
+
