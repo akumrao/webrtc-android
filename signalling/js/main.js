@@ -10,7 +10,7 @@ var turnReady;
 
 var pcConfig = {
   'iceServers': [{
-    'url': 'stun:stun.l.google.com:19302'
+    'urls': 'stun:stun.l.google.com:19302'
   }]
 };
 
@@ -25,13 +25,13 @@ var sdpConstraints = {
 /////////////////////////////////////////////
 
 // Could prompt for room name:
-var room = prompt('Enter room name:', 'room1');
+var room = prompt('Enter camera name:', 'room1');
 
 if (room === '') {
   room = 'room1';
 }
 
-var socket = io.connect("https://192.168.0.19:1794");
+var socket = io.connect();
 socket.emit('create or join', room);
 console.log('Attempted to create or join room', room);
 
@@ -61,7 +61,7 @@ socket.on('log', function(array) {
   console.log.apply(console, array);
 });
 
-////////////////////////////////////////////////
+
 
 function sendMessage(message) {
   console.log('Client sending message: ', message);
@@ -129,13 +129,6 @@ var constraints = {
 
 console.log('Getting user media with constraints', constraints);
 
-if (location.hostname !== 'localhost') {
-  requestTurn(
-//    'https://computeengineondemand.appspot.com/turn?username=41784574&key=4080218913'
-    'https://service.xirsys.com/ice?ident=arvindhanddru&secret=ad6ce53a-e6b5-11e6-9685-937ad99985b9&domain=www.arvind.xyz&application=default&room=testing&secure=1'
-  
-);
-}
 
 function maybeStart() {
   console.log('>>>>>>> maybeStart() ', isStarted, localStream, isChannelReady);
@@ -159,7 +152,16 @@ window.onbeforeunload = function() {
 
 function createPeerConnection() {
   try {
-    pc = new RTCPeerConnection(null);
+    //pc = new RTCPeerConnection(null);
+
+    pc = new RTCPeerConnection({
+                iceServers: [{'urls': 'stun:stun.l.google.com:19302'}],
+                iceTransportPolicy: 'all',
+                bundlePolicy: 'max-bundle',
+                rtcpMuxPolicy: 'require',
+                sdpSemantics: 'unified-plan'
+            });
+
 
 
    var channelSnd = pc.createDataChannel("chat"); // sende PC1 
@@ -306,8 +308,6 @@ function handleRemoteHangup() {
 
 function stop() {
   isStarted = false;
-  // isAudioMuted = false;
-  // isVideoMuted = false;
   pc.close();
   pc = null;
 }
