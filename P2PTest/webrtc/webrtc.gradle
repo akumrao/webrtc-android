@@ -7,6 +7,7 @@ def py2 = rootProject.property("py2")
 def protoc = rootProject.property("protoc")
 
 android {
+    namespace "org.webrtc"
     defaultConfig {
         versionCode rootProject.ext.releaseVersionCode
         versionName rootProject.ext.releaseVersionName
@@ -36,7 +37,6 @@ android {
 
     externalNativeBuild {
         cmake {
-            version "3.10.2"
             path 'CMakeLists.txt'
         }
     }

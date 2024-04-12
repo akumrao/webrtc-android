@@ -1,6 +1,9 @@
 apply plugin: 'com.android.application'
 
 android {
+
+    namespace 'scope.ar.webrtccodelab'
+
     compileSdkVersion rootProject.ext.androidCompileSdkVersion
     buildToolsVersion rootProject.ext.androidBuildToolsVersion
 
