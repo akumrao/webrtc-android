@@ -23,20 +23,16 @@ import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.Camera1Enumerator;
 import org.webrtc.CameraEnumerator;
-import org.webrtc.MultiplexVideoDecoderFactory;
-import org.webrtc.MultiplexVideoEncoderFactory;
-import org.webrtc.VideoCodecInfo;
-import org.webrtc.VideoDecoderFactory;
-import org.webrtc.VideoEncoderFactory;
+//import org.webrtc.MultiplexVideoDecoderFactory;
+//import org.webrtc.MultiplexVideoEncoderFactory;
+//import org.webrtc.VideoCodecInfo;
+//import org.webrtc.VideoDecoderFactory;
+//import org.webrtc.VideoEncoderFactory;
+//import org.webrtc.BuiltinAudioEncoderFactoryFactory;
 
 
-import org.webrtc.BuiltinAudioEncoderFactoryFactory;
-
-import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.DefaultVideoDecoderFactory;
-
-
-
+import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.Logging;
@@ -48,8 +44,8 @@ import org.webrtc.SessionDescription;
 import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
-import org.webrtc.VideoFrame;
-import org.webrtc.VideoSink;
+//import org.webrtc.VideoFrame;
+//import org.webrtc.VideoSink;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
@@ -200,21 +196,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void start() {
         // keep screen on
-
-        Log.e( TAG, " start and create  multiplex factory");
-
-        /// test HTTPSignalling
-
-
-       // HTTPSignalling mysignal;
-        // videoCapturerAndroid = new MyVideoCapturer();  // for random buffer testing
-       // mysignal = new HTTPSignalling();  // for camera testing
-
-       // mysignal.startCapture(1024, 720, 30);
-
-        ///////////////////////////////////////////////////////////////
-
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         initViews();
@@ -223,34 +204,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         SignallingClient.getInstance().init(this);
 
-
-
-        PeerConnectionFactory.initialize(
-                org.webrtc.PeerConnectionFactory.InitializationOptions.builder(this)
-                        .setInjectableLogger(mockLoggable, Logging.Severity.LS_VERBOSE)
-                        .setEnableInternalTracer(false)
-                        .createInitializationOptions());
-
-       // Initialize PeerConnectionFactory globals.
-//        PeerConnectionFactory.InitializationOptions initializationOptions =
-//                PeerConnectionFactory.InitializationOptions.builder(this)
-//                        .createInitializationOptions();
-//        PeerConnectionFactory.initialize(initializationOptions);
+        //Initialize PeerConnectionFactory globals.
+        PeerConnectionFactory.InitializationOptions initializationOptions =
+                PeerConnectionFactory.InitializationOptions.builder(this)
+                        .createInitializationOptions();
+        PeerConnectionFactory.initialize(initializationOptions);
 
         //Create a new PeerConnectionFactory instance - using Hardware encoder and decoder.
         PeerConnectionFactory.Options options = new PeerConnectionFactory.Options();
-
-
-        VideoEncoderFactory encoderFactory = new MultiplexVideoEncoderFactory(
-                rootEglBase.getEglBaseContext(), ENABLE_H264_HIGH_PROFILE);
-
-        VideoDecoderFactory decoderFactory = new MultiplexVideoDecoderFactory(rootEglBase.getEglBaseContext());
-
-
+        DefaultVideoEncoderFactory defaultVideoEncoderFactory = new DefaultVideoEncoderFactory(
+                rootEglBase.getEglBaseContext(),  /* enableIntelVp8Encoder */true,  /* enableH264HighProfile */true);
+        DefaultVideoDecoderFactory defaultVideoDecoderFactory = new DefaultVideoDecoderFactory(rootEglBase.getEglBaseContext());
         peerConnectionFactory = PeerConnectionFactory.builder()
                 .setOptions(options)
-                .setVideoEncoderFactory(encoderFactory)
-                .setVideoDecoderFactory(decoderFactory)
+                .setVideoEncoderFactory(defaultVideoEncoderFactory)
+                .setVideoDecoderFactory(defaultVideoDecoderFactory)
                 .createPeerConnectionFactory();
 
         //Now create a VideoCapturer instance.
@@ -379,26 +347,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }, sdpConstraints);
     }
 
-
-    private static class ProxyVideoSink implements VideoSink {
-        private VideoSink target;
-
-        @Override
-        synchronized public void onFrame(VideoFrame frame, int augLen, byte[] augData) {
-            if (target == null) {
-                //  Log.e("TAG", "Dropping frame in proxy because target is null.");
-                return;
-            }
-            Log.e("TAG",   " augLen=" + Integer.toString(augLen) +  " augData "+ new String(augData)   + " w=" + Integer.toString(frame.getBuffer().getWidth()) + " h="  + Integer.toString(frame.getBuffer().getHeight())        );
-
-            target.onFrame(frame , augLen, augData );
-        }
-
-        synchronized public void setTarget(VideoSink target) {
-            this.target = target;
-        }
-    }
-
     /**
      * Received remote peer's media stream. we will get the first video track and render it
      */
@@ -411,13 +359,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         runOnUiThread(() -> {
             try {
                 remoteVideoView.setVisibility(View.VISIBLE);
-                //videoTrack.addSink(remoteVideoView);
-
-                ProxyVideoSink remoteVideoSink = new ProxyVideoSink();
-                videoTrack.addSink(remoteVideoSink);
-                remoteVideoSink.setTarget(remoteVideoView);
-
-
+                videoTrack.addSink(remoteVideoView);
             } catch (Exception e) {
                 e.printStackTrace();
             }
