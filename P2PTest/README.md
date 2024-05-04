@@ -166,16 +166,39 @@ This app uses a dependency to latest webrtc Android library: org.webrtc:google-w
 
 
 /////////////////////////////final 
-cd /workspace/webrtc/src/sdk  
+
+apt  install golang-go
+
+git clone https://chromium.googlesource.com/chromium/tools/depot_tools
+
+git checkout  remotes/origin/chrome/3904 or remotes/origin/chrome/3865  not sure 
+
+https://chromium.googlesource.com/chromium/tools/depot_tools 
+
+
+ export PATH=/export/webrtc/depot_tools:$PATH
+
+ fetch --nohooks webrtc_android 
+
+ git checkout branch-heads/m76
+
+ gclient sync -D 
+
+
+
+ cd /workspace/webrtc/src/sdk  
+
 
  apt install python
 
 
- export JAVA_HOME=/usr/lib/jvm/jdk1.8.0_131
+export JAVA_HOME=/usr/lib/jvm/jdk1.8.0_131
 
- export PATH=$JAVA_HOME/bin:$PATH
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 
- export PATH=/export/webrtc/depot_tools:$PATH
+export PATH=$JAVA_HOME/bin:$PATH
+
+
 
 
 
@@ -233,6 +256,10 @@ open android studio
 
 
  export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
+
+
+  cp ./out/arm64/clang_x64/protoc ./out then oly do following
+
 
  export PATH=$JAVA_HOME/bin:$PATH
 ./gradlew genWebrtcSrc
