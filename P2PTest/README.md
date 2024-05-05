@@ -72,100 +72,8 @@ ninja -C out/arm64/  AppRTCMobile
 
 Generate the project files:
 
-build/android/gradle/generate_gradle.py --output-directory $PWD/out/arm64 \
---target "//examples:AppRTCMobile" --use-gradle-process-resources \
---split-projects 
 
 
-This is tells for build system that we want .so library for arm architecture.Then type ninja -C out/Debug and wait...
-Image for post
-Also you can specify a directory of your own choice instead of out/Debug, to enable managing multiple configurations in parallel.
-To build for ARM64: use target_cpu="arm64"
-To build for 32-bit x86: use target_cpu="x86"
-To build for 64-bit x64: use target_cpu="x64"
-After successful compilation enter to out/Debug. You will see a lot of stuff, but we need only this things:
-libjingle_peerconnection_so.so lib.java/webrtc/sdk/android/libjingle_peerconnection_java.jar
-lib.java/webrtc/modules/audio_device/audio_device_java.jar
-Step — 5: Add libraries to project
-In your project in app folder create a folder and name it “jniLibs” then inside create a folder with name “armeabi-v7a”, put inside libjingle_peerconnection_so.so. Also you need to do some modifications to gradle file.
-android {
-    ...
-    sourceSets {
-        main {
-            // let gradle pack the shared library into apk
-            jniLibs.srcDirs = ['jniLibs']
-        }
-    }
-}
-Also you need to add lib.java/webrtc/sdk/android/libjingle_peerconnection_java.jar and lib.java/webrtc/modules/audio_device/audio_device_java.jar to your project.
-In the next part I explain theory of WebRTC.
-Thanks)))
-
-
-
-echo "start copying jar files"
-mkdir -p ../libs/armeabi-v7a/
-
-cp out/Debug/lib.java/sdk/android/libjingle_peerconnection_java.jar ../libs/libjingle_peerconnection_java.jar 
-cp out/Debug/lib.java/rtc_base/base_java.jar ../libs/base_java.jar 
-cp out/Debug/gen/modules/audio_device/audio_device_java__compile_java.javac.jar ../libs/audio_device_java__compile_java.javac.jar
-cp out/Debug/lib.java/examples/androidapp/third_party/autobanh/autobanh.jar ../libs/autobanh.jar
-
-echo "start copying so files"
-
-cp out/Debug/libjingle_peerconnection_so.so ../libs/armeabi-v7a/libjingle_peerconnection_so.so
-
-
-
-
-echo "start copying jar files"
-mkdir -p ../libs/arm64-v8a/
-
-cp out/arm64/lib.java/sdk/android/libjingle_peerconnection_java.jar ../libs/libjingle_peerconnection_java.jar 
-cp out/arm64/lib.java/rtc_base/base_java.jar ../libs/base_java.jar 
-cp out/arm64/obj/modules/audio_device/audio_device_java.javac.jar ../libs/audio_device_java.javac.jar
-cp out/arm64/lib.java/examples/androidapp/third_party/autobanh/autobanh.jar ../libs/autobanh.jar
-
-echo "start copying so files"
-
-cp out/arm64/libjingle_peerconnection_so.so ../libs/arm64-v8a/libjingle_peerconnection_so.so
-
-## Similar links 
-
-https://vivekc.xyz/getting-started-with-webrtc-for-android-daab1e268ff4
-
-http://leadtosilverlining.blogspot.com/2018/04/how-to-build-android-webrtc-mobile-app.html
-
-https://github.com/njovy/AppRTCDemo
-
-http://webrtc.github.io/webrtc-org/native-code/android/
-
-https://github.com/SD810/webrtc_example_android_app
-
-https://github.com/ISBX/apprtc-node-server
-
-https://github.com/Androidhacks7/AppRTC-Android
-
-This is working example of WebRTC app from [official webrtc src](https://webrtc.googlesource.com/src/+/refs/heads/master/examples/androidapp/) which can be built with the latest Android Studio(3.6.3).
-
-This app uses a dependency to latest webrtc Android library: org.webrtc:google-webrtc:1.0.32006
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/////////////////////////////final 
 
 apt  install golang-go
 
@@ -246,10 +154,6 @@ delete our rm -rf out/arm
 open android studio
 
 
- * [new branch]            multiplex_codec_with_java -> arvind/multiplex_codec_with_java
- * [new branch]            sfu                   -> arvind/sfu
-
-
 
 
 
@@ -272,9 +176,19 @@ root@slt-pdte-lab01-41:/workspace/webrtc-android/P2PTest# ./gradlew genWebrtcSrc
 
 
 
-/**********************************************************************************************************/ end
 
-for future 
+
+
+Incase if you need mulitplex then add socketiowithwebrtc with following branch 
+
+   multiplex_codec_with_java -> arvind/multiplex_codec_with_java
+
+
+
+
+
+
+# for future project  
 
 
 https://juejin.cn/post/7221454955265556540  
@@ -664,115 +578,3 @@ bashCopy code out/release-build/m94/armeabi-v7a/obj/libwebrtc.a
 
 
 At this point, WebRTC compilation is completed, copy libwebrtc.a libwebrtc.jar for later use
-
-
-compile mediasoup
-download
-mediasoup-client-android m94 compilation
- download address
-bashCopy codegit clone https://github.com/haiyangwu/mediasoup-client-android.git
-git checkout -b 340 3.4.0-beta
-
-compile
-Import the compiled libwebrtc.a and libwebrtc.jar of each abi into the mediasoup-client/deps/webrtc/lib directory of mediasoup-client-android and replace them.
- 
-Open them with Android Studio and start compiling. . .
-
-mediasoup 320 version compilation
-WebRTC m84 compilation
-The corresponding WebRTC version of libmediasoupclient is branch-heads/4147
-cssCopy codecd src
-git checkout -b m84 branch-heads/4147 
-
-cd ..
-gclient sync --nohooks
-gclient runhooks
-
-Compilation is similar to the m94 version
-libmediasoupclientcompile
-
-Download libmediasoupclient
-Switch branch 320
-
-bashCopy codegit clone https://github.com/versatica/libmediasoupclient
-git checkout -b 320 3.2.0
-
-mediasoup-client-android m84 compilation
- 
-download address
-bashCopy code git clone https://github.com/haiyangwu/mediasoup-client-android.git
- git checkout -b 320 59315929fb2be499c474dd21a4e95b6b69116d80
-
-
-Copy the downloaded libmediasoupclient 320 branch to the mediasoup-client-android/mediasoup-client/deps directory
-Delete SendTransport::ProduceData related methods
-Import the header files of the webrtc 84 branch into the mediasoup-client-android/mediasoup-client/deps/webrtc/src directory
-
-
-
-Can be exported from webrtc source code
-bashCopy codecd ~/webrtc/android/src
-mkdir -p ~/m84/include/third_party/
-cp -r       api/                    ~/m84/include/
-cp -r       audio/                    ~/m84/include/
-cp -r       base/                    ~/m84/include/
-cp -r       build_overrides/                    ~/m84/include/
-cp -r       call/                    ~/m84/include/
-cp -r       common_audio/                    ~/m84/include/
-cp -r       common_video/                    ~/m84/include/
-cp -r       logging/                    ~/m84/include/
-cp -r       media/                    ~/m84/include/
-cp -r       modules/                    ~/m84/include/
-cp -r       p2p/                    ~/m84/include/
-cp -r       pc/                    ~/m84/include/
-cp -r       rtc_base/                    ~/m84/include/
-cp -r       rtc_tools/                    ~/m84/include/
-cp -r       sdk/                    ~/m84/include/
-cp -r       stats/                    ~/m84/include/
-cp -r       style-guide/                    ~/m84/include/
-cp -r       system_wrappers/                    ~/m84/include/
-cp -r       test/                    ~/m84/include/
-cp -r       third_party/abseil-cpp/     ~/m84/include/third_party/
-cp -r       tools_webrtc/                    ~/m84/include/
-cp -r       video/                    ~/m84/include/
-cp .clang-format  ~/m84/include/
-cp .git-blame-ignore-revs  ~/m84/include/
-cp .gitignore  ~/m84/include/
-cp .vpython  ~/m84/include/
-cp abseil-in-webrtc.md  ~/m84/include/
-cp AUTHORS  ~/m84/include/
-cp BUILD.gn  ~/m84/include/
-cp codereview.settings  ~/m84/include/
-cp CODE_OF_CONDUCT.md  ~/m84/include/
-cp common_types.h  ~/m84/include/
-cp DEPS  ~/m84/include/
-cp ENG_REVIEW_OWNERS  ~/m84/include/
-cp LICENSE  ~/m84/include/
-cp license_template.txt  ~/m84/include/
-cp native-api.md  ~/m84/include/
-cp OWNERS  ~/m84/include/
-cp PATENTS  ~/m84/include/
-cp PRESUBMIT.py  ~/m84/include/
-cp presubmit_test.py  ~/m84/include/
-cp presubmit_test_mocks.py  ~/m84/include/
-cp pylintrc  ~/m84/include/
-cp README.chromium  ~/m84/include/
-cp README.md  ~/m84/include/
-cp style-guide.md  ~/m84/include/
-cp WATCHLISTS  ~/m84/include/
-cp webrtc.gni  ~/m84/include/
-cp whitespace.txt  ~/m84/include/
-
-
-Open it with Android Studio and start compiling. . .
-
-
-Reference documentation
-
-Development | WebRTC
-mediasoup documentation_v3
-ubuntu set up vpn client
-mediasoup-client-android
-webrtc-android-build
-
-
