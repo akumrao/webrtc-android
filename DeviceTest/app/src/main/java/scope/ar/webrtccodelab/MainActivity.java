@@ -9,21 +9,31 @@ import android.widget.Button;
 
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
-import org.webrtc.CameraVideoCapturer;
+import org.webrtc.Camera1Enumerator;
+import org.webrtc.CameraEnumerator;
+//import org.webrtc.MultiplexVideoDecoderFactory;
+//import org.webrtc.MultiplexVideoEncoderFactory;
+//import org.webrtc.VideoCodecInfo;
+//import org.webrtc.VideoDecoderFactory;
+//import org.webrtc.VideoEncoderFactory;
+//import org.webrtc.BuiltinAudioEncoderFactoryFactory;
+
+
 import org.webrtc.DefaultVideoDecoderFactory;
 import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
 import org.webrtc.HardwareVideoDecoderFactory;
 import org.webrtc.HardwareVideoEncoderFactory;
 import org.webrtc.IceCandidate;
+import org.webrtc.Logging;
 import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
-import org.webrtc.MultiplexVideoDecoderFactory;
-import org.webrtc.MultiplexVideoEncoderFactory;
+
 import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
 import org.webrtc.SdpObserver;
 import org.webrtc.SessionDescription;
+import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
 //import org.webrtc.VideoCapturerAndroid;
@@ -219,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-        PeerConnectionFactory.Options options = new PeerConnectionFactory.Options();
+
 
 
        // DefaultVideoEncoderFactory defaultVideoEncoderFactory = new DefaultVideoEncoderFactory(
@@ -236,17 +246,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-        VideoEncoderFactory encoderFactory = new MultiplexVideoEncoderFactory(
-                rootEglBase.getEglBaseContext(), ENABLE_H264_HIGH_PROFILE);
+//        VideoEncoderFactory encoderFactory = new MultiplexVideoEncoderFactory(
+//                rootEglBase.getEglBaseContext(), ENABLE_H264_HIGH_PROFILE);
+//
+//        VideoDecoderFactory decoderFactory = new MultiplexVideoDecoderFactory(rootEglBase.getEglBaseContext());
 
-        VideoDecoderFactory decoderFactory = new MultiplexVideoDecoderFactory(rootEglBase.getEglBaseContext());
 
 
+
+        //Create a new PeerConnectionFactory instance - using Hardware encoder and decoder.
+        PeerConnectionFactory.Options options = new PeerConnectionFactory.Options();
+        DefaultVideoEncoderFactory defaultVideoEncoderFactory = new DefaultVideoEncoderFactory(
+                rootEglBase.getEglBaseContext(),  /* enableIntelVp8Encoder */true,  /* enableH264HighProfile */true);
+        DefaultVideoDecoderFactory defaultVideoDecoderFactory = new DefaultVideoDecoderFactory(rootEglBase.getEglBaseContext());
         peerConnectionFactory = PeerConnectionFactory.builder()
                 .setOptions(options)
-                .setVideoEncoderFactory(encoderFactory)
-                .setVideoDecoderFactory(decoderFactory)
+                .setVideoEncoderFactory(defaultVideoEncoderFactory)
+                .setVideoDecoderFactory(defaultVideoDecoderFactory)
                 .createPeerConnectionFactory();
+
+
+
+//
+//        peerConnectionFactory = PeerConnectionFactory.builder()
+//                .setOptions(options)
+//                .setVideoEncoderFactory(encoderFactory)
+//                .setVideoDecoderFactory(decoderFactory)
+//                .createPeerConnectionFactory();
 
 
         //Now create a VideoCapturer instance. Callback methods are there if you want to do something! Duh!

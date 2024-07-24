@@ -10,7 +10,7 @@ import org.webrtc.RtpReceiver;
 
 /**
  * Webrtc_Step2
- * Created by arvind
+
  */
 
 class CustomPeerConnectionObserver implements PeerConnection.Observer {

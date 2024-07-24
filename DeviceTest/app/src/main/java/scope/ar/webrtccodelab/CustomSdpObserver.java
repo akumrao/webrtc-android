@@ -7,7 +7,7 @@ import org.webrtc.SessionDescription;
 
 /**
  * Webrtc_Step2
- * Created by arvind
+
  */
 
 class CustomSdpObserver implements SdpObserver {
@@ -23,7 +23,7 @@ class CustomSdpObserver implements SdpObserver {
 
     @Override
     public void onCreateSuccess(SessionDescription sessionDescription) {
-        Log.d(tag, sessionDescription.description);
+        Log.d(tag, "onCreateSuccess() called with: sessionDescription = [" + sessionDescription + "]");
     }
 
     @Override

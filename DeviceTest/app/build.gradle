@@ -1,6 +1,9 @@
 apply plugin: 'com.android.application'
 
 android {
+
+    namespace 'scope.ar.webrtccodelab'
+
     compileSdkVersion rootProject.ext.androidCompileSdkVersion
     buildToolsVersion rootProject.ext.androidBuildToolsVersion
 
@@ -40,6 +43,17 @@ dependencies {
  //   implementation 'org.webrtc:google-webrtc:1.0.22672'
    // implementation (name:'autobanh', ext:'jar')
     implementation project(':webrtc')
+    
+
+    implementation('io.socket:socket.io-client:0.8.3') {
+        // excluding org.json which is provided by Android
+        exclude group: 'org.json', module: 'json'
+    }
+    implementation 'com.google.code.gson:gson:2.8.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'	
+
+
 }
 
 
